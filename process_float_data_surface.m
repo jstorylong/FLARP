@@ -1,0 +1,68 @@
+%
+% Process the BB2FL2 float data to use for the PACE satellite matchups
+%
+% These float files were processed by Yui Takeshita by collecting the float
+% data normally, and also the aux files. The aux files which contained the
+% CHL435 data were interpolated to the rest of the data for each float
+% using pressure
+%
+%
+%
+
+close all; clear all
+fpath = ('/Users/jlong/Documents/Data/PACE Hackweek/BBFL2_floats/');
+% Load float data save in 'process_float_data.m'
+load([fpath, '/bbfl2_surface_float_data.mat'])
+
+%% Loop through unique profiles
+R = fs.CHL435./fs.CHLA;
+
+% plot data XY
+figure(1)
+scatter(fs.CHL435,fs.CHLA,10,fs.LAT,'filled')
+colorbar
+title('x = 435, y = 470, color = latitude')
+
+% Map
+figure(2)
+m_proj('mollweide','long',[-180 179],'lat',[-90 90]);hold on
+%m_gshhs_l('patch',rgb('gray'),'edgecolor','k');hold on
+m_scatter(fs.LON,fs.LAT,50,R,'Filled')
+caxis([0 2])
+colormap(cmocean('tarn'))
+cb = colorbar;
+title(cb,'Chl435:Chl470')
+title('')
+m_grid('box','off','tickdir','in','linestyle','none','yticklabels',[],'xticklabels',[]);
+
+% Map
+figure(2);clf
+m_proj('mollweide','long',[-180 179],'lat',[-90 90]);hold on
+m_plot(fs.LON,fs.LAT,'ko','MarkerFaceColor',rgb('yellow'))
+m_gshhs_l('patch',rgb('gray'),'edgecolor','k');hold on
+title('')
+m_grid('box','off','tickdir','in','linestyle','none','yticklabels',[],'xticklabels',[]);
+
+% Loop at the ratio through depth for a float
+load([fpath, '/bbfl2_float_data.mat'])
+
+
+cd(fpath)
+fn = dir('*.mat');
+fn = {fn.name};
+i = 3;
+% Load float data
+load([fpath char(fn(i))])
+
+tmp = char(fn(i));
+fR = f.CHL435./f.CHLA;
+idx = find(f.CRUISE == str2num(tmp(1:end-13)));
+%idx = find(f.CRUISE == 1902601)
+figure(2); clf
+scatter(f.SDN(idx),-f.PRES(idx),30,fR(idx),'Filled')
+ylim([-250 0])
+caxis([0 2])
+colormap(cmocean('tarn'))
+cb = colorbar;
+title(cb,'Chl435:Chl470')
+
